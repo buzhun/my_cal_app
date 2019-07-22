@@ -54,9 +54,13 @@ class _OptWidgetState extends State<OptWidget> {
 
   void _handleNumberBtnChanged(String val) {
     var newScreen = _screen;
-    var newEntry = entry;
+    var newEntry = entry.toList();
     var newLast = '';
     final lastIsNumber = RegExp(r'^[0-9.]+$').hasMatch(last);
+
+    if (val == '.' && last.contains('.')) {
+      return;
+    }
 
     if (last == '0' && entry.length == 1 && val != '.') {
       newScreen = val;
@@ -100,19 +104,26 @@ class _OptWidgetState extends State<OptWidget> {
         result = x / y;
         break;
     }
-    const double infinity = 1.0 / 0.0;
 
     print('result: $result');
     // 0 的除法
-    if(result == infinity){
+    if (result.isInfinite || result.isNaN) {
       return '错误';
-    } else if (result.toString().length > 8){
-      return result.toStringAsExponential(3);
+    } else if (result.toString().length > 8) {
+      // 保留小数位数 =  10 - int 类型的位数
+      return result.toString();
     } else if (result.toInt() - result == 0) {
       return result.toInt().toString();
     } else {
-      return result.toString().length > 8 ? result.toStringAsFixed(5) : result.toString();
+//      return result.toString().length > 8 ? result.toStringAsFixed(5) : result.toString();
+      return result.toString();
     }
+  }
+
+  String formatNumber(result) {
+    return result.length > 8
+        ? double.parse(result).toStringAsExponential(3)
+        : result;
   }
 
   // 计算第一个表达式
@@ -133,11 +144,24 @@ class _OptWidgetState extends State<OptWidget> {
         return _cal(_cal(expressList[0], operate1, expressList[2]), operate2,
             expressList[4]);
       }
-    }
-    else{
+    } else {
       // error
       return '';
     }
+  }
+
+  void changeLast(result) {
+    List<String> newEntry = [];
+    for (int i = 0; i < entry.length - 1; i++) {
+      newEntry[i] = entry[i];
+    }
+    newEntry.add(result);
+    setState(() {
+      _screen = formatNumber(result);
+      entry = newEntry;
+      activeBtn = '';
+      last = result;
+    });
   }
 
   void _handleOperatorBtnChanged(String val) {
@@ -153,6 +177,19 @@ class _OptWidgetState extends State<OptWidget> {
       newLast = val;
       newEntry.add(val);
       newScreen = last;
+    }
+
+    if (val == '%') {
+      final String result = (double.parse(last) / 100).toString();
+      changeLast(result);
+      return;
+    }
+
+    if (val == '+/-') {
+      final String result =
+          double.parse(last).isNegative ? last.substring(1) : '-' + last;
+      changeLast(result);
+      return;
     }
 
     final length = entry.length;
@@ -193,7 +230,7 @@ class _OptWidgetState extends State<OptWidget> {
           pushStack();
         } else {
           final String result = calExpress(entry);
-          if (result == '错误'){
+          if (result == '错误') {
             newActiveBtn = '';
             newLast = '0';
             newEntry = ['0'];
@@ -231,7 +268,7 @@ class _OptWidgetState extends State<OptWidget> {
         newEntry[entry.length - 1] = val;
         break;
       case 5:
-        final String result1 =  calExpress(entry);
+        final String result1 = calExpress(entry);
         if (val == '=') {
           // 1+2*3（=）  =>  1+ 6 => 7
           newActiveBtn = '';
@@ -253,7 +290,7 @@ class _OptWidgetState extends State<OptWidget> {
           newScreen = result2;
         }
     }
-    
+
     setState(() {
       _screen = newScreen;
       entry = newEntry;
@@ -277,63 +314,66 @@ class _OptWidgetState extends State<OptWidget> {
     };
 
     return Container(
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.black,
         ),
-        child:
-            Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Container(
-            width: 750.0,
-            height: 100.0,
-            padding: EdgeInsets.only(top: 50.0),
-            child: Text(
-              entry.join(''),
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 50.0,
+        child: SafeArea(
+            child: Flex(
+                direction: Axis.vertical,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+              Container(
+                alignment: Alignment.centerRight,
+                height: 160.0,
+                padding: EdgeInsets.only(bottom: 40.0 ),
+                child: Text(
+                  '$_screen',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 80.0,
+                  ),
+                  strutStyle: StrutStyle(
+                    fontSize: 80.0,
+                    height: 1.5,
+                  ),
+                ),
               ),
-            ),
-          ),
-          Container(
-            width: 750.0,
-            height: 200.0,
-            padding: EdgeInsets.only(top: 100.0),
-            child: Text(
-              '$_screen',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 80.0,
-              ),
-            ),
-          ),
-          Expanded(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: widget.buttonLists.map((buttonList) {
-                    return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: buttonList.map((name) {
-                          final type = RegExp(r'^[0-9.]+$').hasMatch(name)
-                              ? 'number'
-                              : RegExp(r"([/%])").hasMatch(name)
-                                  ? 'other'
-                                  : 'operate';
+              Expanded(
+                  flex: 4,
+                  child: Flex(
+                      direction: Axis.vertical,
+                      children: widget.buttonLists.map((buttonList) {
+                        return Expanded(
+                            flex: 1,
+                            child: Flex(
+                                direction: Axis.horizontal,
+                                children: buttonList.map((name) {
+                                  final type =
+                                      RegExp(r'^[0-9.]+$').hasMatch(name)
+                                          ? 'number'
+                                          : RegExp(r"([/%])").hasMatch(name)
+                                              ? 'other'
+                                              : 'operate';
 
-                          return name == 'C'
-                              ? ClearBtn(
-                                  isClearAll: _screen == '0',
-                                  onChanged: _handleClearBtnChanged,
-                                )
-                              : BaseBtn(
-                                  name: name,
-                                  actived: activeBtn == name,
-                                  colorType: colorMap[type],
-                                  onChanged: handleMap[type],
-                                );
-                        }).toList());
-                  }).toList()))
-        ]));
+                                  return Expanded(
+                                      flex: name == '0' ? 2 : 1,
+                                      child: Center(
+                                          child: name == 'C'
+                                              ? ClearBtn(
+                                                  isClearAll: _screen == '0',
+                                                  onChanged:
+                                                      _handleClearBtnChanged,
+                                                )
+                                              : BaseBtn(
+                                                  name: name,
+                                                  actived: activeBtn == name,
+                                                  colorType: colorMap[type],
+                                                  onChanged: handleMap[type],
+                                                )));
+                                }).toList()));
+                      }).toList()))
+            ])));
   }
 }

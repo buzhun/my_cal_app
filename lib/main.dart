@@ -31,11 +31,11 @@ class OptWidget extends StatefulWidget {
 
 class _OptWidgetState extends State<OptWidget> {
   String _screen = '0';
-  String last = '0';
   List<String> entry = ['0'];
   String activeBtn = '';
 
   void _handleClearBtnChanged(bool isClearAll) {
+    print('clear:$isClearAll');
     // 1 + 2 (AC)  = > 0
     List<String> newEntry = ['0'];
     if (!isClearAll) {
@@ -46,7 +46,6 @@ class _OptWidgetState extends State<OptWidget> {
 
     setState(() {
       _screen = '0';
-      last = '0';
       entry = newEntry;
       activeBtn = '';
     });
@@ -55,7 +54,7 @@ class _OptWidgetState extends State<OptWidget> {
   void _handleNumberBtnChanged(String val) {
     var newScreen = _screen;
     var newEntry = entry.toList();
-    var newLast = '';
+    var last = entry[entry.length - 1];
     final lastIsNumber = RegExp(r'^[0-9.]+$').hasMatch(last);
 
     if (val == '.' && last.contains('.')) {
@@ -64,22 +63,18 @@ class _OptWidgetState extends State<OptWidget> {
 
     if (last == '0' && entry.length == 1 && val != '.') {
       newScreen = val;
-      newLast = val;
       newEntry[entry.length - 1] = val;
     } else if (lastIsNumber) {
       newScreen += val;
-      newLast = last + val;
-      newEntry[entry.length - 1] = newLast;
+      newEntry[entry.length - 1] = val;
     } else {
       // 1 + (3)
       newEntry.add(val);
       newScreen = val;
-      newLast = val;
     }
 
     setState(() {
       _screen = newScreen;
-      last = newLast;
       entry = newEntry;
       activeBtn = '';
     });
@@ -160,21 +155,19 @@ class _OptWidgetState extends State<OptWidget> {
       _screen = formatNumber(result);
       entry = newEntry;
       activeBtn = '';
-      last = result;
     });
   }
 
   void _handleOperatorBtnChanged(String val) {
 //    final lastIsNumber = RegExp(r'^[0-9]+$').hasMatch(last);
     var newActiveBtn = '';
-    var newLast = '';
     var newEntry = entry;
     var newScreen = '';
+    var last = entry[entry.length - 1];
 
     // 新符号入栈
     void pushStack() {
       newActiveBtn = val;
-      newLast = val;
       newEntry.add(val);
       newScreen = last;
     }
@@ -199,7 +192,6 @@ class _OptWidgetState extends State<OptWidget> {
         if (val == '=') {
           // 1 (=) 相当于没有
           newActiveBtn = '';
-          newLast = last;
           newEntry = entry;
           newScreen = _screen;
         } else {
@@ -212,14 +204,12 @@ class _OptWidgetState extends State<OptWidget> {
         if (val == '=') {
           final String result = _cal(entry[0], entry[1], entry[0]);
           newActiveBtn = '';
-          newLast = result;
           newEntry = [result];
           newScreen = result;
         } else {
           // 1 + (-) 覆盖上一个运算符
           newActiveBtn = val;
-          newLast = val;
-          newEntry[entry.length - 1] = newLast;
+          newEntry[entry.length - 1] = val;
           newScreen = last;
         }
         break;
@@ -232,20 +222,17 @@ class _OptWidgetState extends State<OptWidget> {
           final String result = calExpress(entry);
           if (result == '错误') {
             newActiveBtn = '';
-            newLast = '0';
             newEntry = ['0'];
             newScreen = '错误';
           } else {
             if (val == '=') {
               // 1+2(=) 求值
               newActiveBtn = '';
-              newLast = result;
               newEntry = [result];
               newScreen = result;
             } else {
               // 1+2(+) => 3 + 求值并将值和运算符都入栈
               newActiveBtn = val;
-              newLast = val;
               entry.replaceRange(0, 3, [result, val]);
               newEntry = entry;
               newScreen = result;
@@ -259,12 +246,10 @@ class _OptWidgetState extends State<OptWidget> {
           final String result =
               _cal(entry[0], entry[1], _cal(entry[2], entry[3], entry[2]));
           newActiveBtn = '';
-          newLast = result;
           newEntry = [result];
         }
         // 1 + 2 + (-) =>1 + 2 -  覆盖
         newActiveBtn = val;
-        newLast = val;
         newEntry[entry.length - 1] = val;
         break;
       case 5:
@@ -272,20 +257,17 @@ class _OptWidgetState extends State<OptWidget> {
         if (val == '=') {
           // 1+2*3（=）  =>  1+ 6 => 7
           newActiveBtn = '';
-          newLast = result1;
           newEntry = [result1];
           newScreen = result1;
         } else if (RegExp(r'^[+-]$').hasMatch(val)) {
           // 1+2*3+
           newActiveBtn = val;
-          newLast = val;
           newEntry = [result1, val];
           newScreen = result1;
         } else if (RegExp(r'^[×÷]$').hasMatch(val)) {
           // 1+2*3* // 变成 1 + 6 显示 6
           final String result2 = _cal(entry[2], entry[3], entry[4]);
           newActiveBtn = val;
-          newLast = val;
           newEntry = [entry[0], entry[1], result2, val];
           newScreen = result2;
         }
@@ -295,7 +277,6 @@ class _OptWidgetState extends State<OptWidget> {
       _screen = newScreen;
       entry = newEntry;
       activeBtn = newActiveBtn;
-      last = newLast;
     });
   }
 
@@ -305,12 +286,6 @@ class _OptWidgetState extends State<OptWidget> {
       'number': _handleNumberBtnChanged,
       'other': _handleOperatorBtnChanged,
       'operate': _handleOperatorBtnChanged,
-    };
-
-    final colorMap = {
-      'number': 'black',
-      'other': 'grey',
-      'operate': 'orange',
     };
 
     return Container(
@@ -326,7 +301,7 @@ class _OptWidgetState extends State<OptWidget> {
               Container(
                 alignment: Alignment.centerRight,
                 height: 160.0,
-                padding: EdgeInsets.only(bottom: 40.0 ),
+                padding: EdgeInsets.only(bottom: 40.0),
                 child: Text(
                   '$_screen',
                   textAlign: TextAlign.right,
@@ -353,25 +328,21 @@ class _OptWidgetState extends State<OptWidget> {
                                   final type =
                                       RegExp(r'^[0-9.]+$').hasMatch(name)
                                           ? 'number'
-                                          : RegExp(r"([/%])").hasMatch(name)
+                                          : RegExp(r"([C/%])").hasMatch(name)
                                               ? 'other'
                                               : 'operate';
 
                                   return Expanded(
                                       flex: name == '0' ? 2 : 1,
                                       child: Center(
-                                          child: name == 'C'
-                                              ? ClearBtn(
-                                                  isClearAll: _screen == '0',
-                                                  onChanged:
-                                                      _handleClearBtnChanged,
-                                                )
-                                              : BaseBtn(
-                                                  name: name,
-                                                  actived: activeBtn == name,
-                                                  colorType: colorMap[type],
-                                                  onChanged: handleMap[type],
-                                                )));
+                                          child: BaseBtn(
+                                        name: name,
+                                        active: activeBtn == name,
+                                        type: type,
+                                        onChanged: handleMap[type],
+                                        screenIsZero: _screen == '0',
+                                        onClear: _handleClearBtnChanged,
+                                      )));
                                 }).toList()));
                       }).toList()))
             ])));

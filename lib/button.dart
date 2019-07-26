@@ -28,6 +28,7 @@ class BaseBtn extends StatefulWidget {
     @required this.type,
     @required this.onChanged,
     @required this.screenIsZero,
+    @required  this.isLargeScreen,
     this.onClear,
   }) : super(key: key);
 
@@ -37,6 +38,7 @@ class BaseBtn extends StatefulWidget {
   // 是否为当前活跃的按钮
   final bool active;
   final bool screenIsZero;
+  final bool isLargeScreen;
 
   // 点击回调
   final onChanged;
@@ -101,8 +103,8 @@ class _BaseBtnState extends State<BaseBtn> {
     final Widget text = Text(
       displayName,
       style: TextStyle(
-        fontSize: 40.0,
-        color:  widget.active ? Colors.orange : fontColorMap[widget.type],
+        fontSize: widget.isLargeScreen ? 20.0 : 40.0,
+        color: widget.active ? Colors.orange : fontColorMap[widget.type],
       ),
     );
 

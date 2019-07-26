@@ -11,6 +11,13 @@ final buttonLists = [
 ];
 
 class OptWidget extends StatefulWidget {
+  OptWidget({
+    Key key,
+    @required this.isLargeScreen,
+  }) : super(key: key);
+
+  final bool isLargeScreen;
+
   @override
   _OptWidgetState createState() => _OptWidgetState();
 }
@@ -235,8 +242,8 @@ class _OptWidgetState extends State<OptWidget> {
       case 4:
         // 1 + 2 * (=) => 1 + 2 * 2 => 1 + 4 => 5
         if (val == '=') {
-          final String result =
-              _cal(newEntry[0], newEntry[1], _cal(newEntry[2], newEntry[3], newEntry[2]));
+          final String result = _cal(newEntry[0], newEntry[1],
+              _cal(newEntry[2], newEntry[3], newEntry[2]));
           newActiveBtn = '';
           newEntry = [result];
           lastIsResult = true;
@@ -283,6 +290,7 @@ class _OptWidgetState extends State<OptWidget> {
       'operate': _handleOperatorBtnChanged,
     };
 
+    double fontSize = widget.isLargeScreen ? 30.0: 80.0;
     return Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -295,17 +303,18 @@ class _OptWidgetState extends State<OptWidget> {
                 children: [
               Container(
                 alignment: Alignment.centerRight,
-                height: 160.0,
-                padding: EdgeInsets.only(bottom: 40.0),
+                height: widget.isLargeScreen ? 80 : 160.0,
+                padding:
+                    EdgeInsets.only(bottom: widget.isLargeScreen ? 10.0 : 40.0),
                 child: Text(
                   '$_screen',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 80.0,
+                    fontSize: fontSize,
                   ),
                   strutStyle: StrutStyle(
-                    fontSize: 80.0,
+                    fontSize: fontSize,
                     height: 1.5,
                   ),
                 ),
@@ -330,14 +339,20 @@ class _OptWidgetState extends State<OptWidget> {
                                   return Expanded(
                                       flex: name == '0' ? 2 : 1,
                                       child: Center(
-                                          child: BaseBtn(
-                                        name: name,
-                                        active: _activeBtn == name,
-                                        type: type,
-                                        onChanged: handleMap[type],
-                                        screenIsZero: _screen == '0',
-                                        onClear: _handleClearBtnChanged,
-                                      )));
+                                        child: Padding(
+                                            //左边添加8像素补白
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: BaseBtn(
+                                              isLargeScreen:
+                                                  widget.isLargeScreen,
+                                              name: name,
+                                              active: _activeBtn == name,
+                                              type: type,
+                                              onChanged: handleMap[type],
+                                              screenIsZero: _screen == '0',
+                                              onClear: _handleClearBtnChanged,
+                                            )),
+                                      ));
                                 }).toList()));
                       }).toList()))
             ])));

@@ -1,16 +1,21 @@
-# my_app
+# Flutter 计算器
 
-A new Flutter project.
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+## 项目描述
+- 项目名称：Flutter 计算器
+- 功能简述： 使用 Flutter 实现 IOS 和 Android 端的计算器 App
+- github: https://github.com/buzhun/my_cal_app
+- mail：wmonkeylin@gmail.com
 
-A few resources to get you started if this is your first Flutter project:
+## 如何运行
+- 开发环境配置：安装 flutter SDK， Android Studio Editor.
+- 本地开发: flutter run
+- 构建发布: flutter build apk
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+## 业务介绍
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+## 项目备注
+- 支持简单计算器的功能
+- 支持自适应布局，支持刘海屏
+- 支持横竖屏旋转

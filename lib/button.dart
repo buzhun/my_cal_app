@@ -8,10 +8,22 @@ final fontColorMap = {
   'operate': Colors.white,
 };
 
+final themeWhiteFontColorMap = {
+  'number': Colors.grey[800],
+  'other': Colors.grey[800],
+  'operate': Colors.orange,
+};
+
 final bgColorMap = {
   'number': Colors.grey[800],
   'other': Colors.grey[300],
   'operate': Colors.orange,
+};
+
+final themeWhiteBgColorMap = {
+  'number': Colors.white,
+  'other': Colors.white,
+  'operate': Colors.white,
 };
 
 final lightColorMap = {
@@ -28,7 +40,8 @@ class BaseBtn extends StatefulWidget {
     @required this.type,
     @required this.onChanged,
     @required this.screenIsZero,
-    @required  this.isLargeScreen,
+    this.themeIsBlack,
+    @required this.isLargeScreen,
     this.onClear,
   }) : super(key: key);
 
@@ -39,6 +52,7 @@ class BaseBtn extends StatefulWidget {
   final bool active;
   final bool screenIsZero;
   final bool isLargeScreen;
+  final bool themeIsBlack;
 
   // 点击回调
   final onChanged;
@@ -104,7 +118,11 @@ class _BaseBtnState extends State<BaseBtn> {
       displayName,
       style: TextStyle(
         fontSize: widget.isLargeScreen ? 20.0 : 40.0,
-        color: widget.active ? Colors.orange : fontColorMap[widget.type],
+        color: widget.active
+            ? Colors.orange
+            : widget.themeIsBlack
+                ? fontColorMap[widget.type]
+                : themeWhiteFontColorMap[widget.type],
       ),
     );
 
@@ -113,12 +131,13 @@ class _BaseBtnState extends State<BaseBtn> {
     );
 
     final Widget zeroText = Container(
-      padding: EdgeInsets.fromLTRB(22.0, 12.0, 0, 0),
+      padding: widget.isLargeScreen
+          ? EdgeInsets.fromLTRB(25, 6, 0, 0)
+          : EdgeInsets.fromLTRB(22.0, 12.0, 0, 0),
       child: text,
     );
 
     return GestureDetector(
-
       onTapDown: _handleTapDown,
       // Handle the tap events in the order that
       onTapUp: _handleTapUp,
@@ -127,17 +146,22 @@ class _BaseBtnState extends State<BaseBtn> {
       onTapCancel: _handleTapCancel,
       child: Container(
         child: widget.name == '0' ? zeroText : centerText,
-        width: widget.name == '0' ? 140.0 : 70.0,
+        width: widget.name == '0' ? (widget.isLargeScreen ? 250 : 140.0) : 70.0,
         height: 70.0,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(
             const Radius.circular(70.0),
           ),
+          border: !widget.themeIsBlack
+              ? new Border.all(color: Colors.grey[800])
+              : null,
           color: widget.active
               ? Colors.white
               : _highlight
                   ? lightColorMap[widget.type]
-                  : bgColorMap[widget.type],
+                  : widget.themeIsBlack
+                      ? bgColorMap[widget.type]
+                      : themeWhiteBgColorMap[widget.type],
         ),
       ),
     );

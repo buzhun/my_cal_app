@@ -292,11 +292,11 @@ class _OptWidgetState extends State<OptWidget> {
       'operate': _handleOperatorBtnChanged,
     };
 
-    double fontSize = widget.isLargeScreen ? 30.0: 80.0;
+    double fontSize = widget.isLargeScreen ? 30.0 : 80.0;
     return Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: widget.themeIsBlack ? Colors.black: Colors.white,
+          color: widget.themeIsBlack ? Colors.black : Colors.white,
         ),
         child: SafeArea(
             child: Flex(
@@ -312,7 +312,7 @@ class _OptWidgetState extends State<OptWidget> {
                   '$_screen',
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: widget.themeIsBlack ? Colors.white : Colors.black,
                     fontSize: fontSize,
                   ),
                   strutStyle: StrutStyle(
@@ -343,8 +343,11 @@ class _OptWidgetState extends State<OptWidget> {
                                       child: Center(
                                         child: Padding(
                                             //左边添加8像素补白
-                                            padding: const EdgeInsets.all(8.0),
+                                            padding: widget.themeIsBlack
+                                                ? const EdgeInsets.all(8.0)
+                                                : EdgeInsets.all(2.0),
                                             child: BaseBtn(
+                                              themeIsBlack: widget.themeIsBlack,
                                               isLargeScreen:
                                                   widget.isLargeScreen,
                                               name: name,

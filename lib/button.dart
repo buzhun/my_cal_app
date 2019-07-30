@@ -118,6 +118,7 @@ class _BaseBtnState extends State<BaseBtn> {
     );
 
     return GestureDetector(
+
       onTapDown: _handleTapDown,
       // Handle the tap events in the order that
       onTapUp: _handleTapUp,

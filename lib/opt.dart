@@ -13,10 +13,12 @@ final buttonLists = [
 class OptWidget extends StatefulWidget {
   OptWidget({
     Key key,
+    this.themeIsBlack,
     @required this.isLargeScreen,
   }) : super(key: key);
 
   final bool isLargeScreen;
+  final bool themeIsBlack;
 
   @override
   _OptWidgetState createState() => _OptWidgetState();
@@ -294,7 +296,7 @@ class _OptWidgetState extends State<OptWidget> {
     return Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: widget.themeIsBlack ? Colors.black: Colors.white,
         ),
         child: SafeArea(
             child: Flex(

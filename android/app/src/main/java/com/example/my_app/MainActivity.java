@@ -12,11 +12,14 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
     private static final String CHANNEL = "samples.flutter.dev/theme";
+    public static final String PREFS_NAME = "MyPrefsFile";
 
-    private String _theme= "black";
-
-    void changeTheme(String theme) {
-        _theme = theme;
+    String changeTheme(String theme) {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("theme", theme);
+        editor.commit();
+        return theme;
     }
 
     @Override
@@ -31,12 +34,12 @@ public class MainActivity extends FlutterActivity {
                     public void onMethodCall(MethodCall call, Result result) {
                         // Note: this method is invoked on the main thread.
                         if (call.method.equals("_getTheme")) {
-
-                            result.success(_theme);
-
+                            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                            String theme = settings.getString("theme", "black");
+                            result.success(theme);
                         } else if (call.method.equals("_setTheme")) {
-                            changeTheme(call.arguments());
-                            result.success(_theme);
+                            String theme = changeTheme(call.arguments());
+                            result.success(theme);
                         }
                         {
                             result.notImplemented();

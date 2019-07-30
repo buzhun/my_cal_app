@@ -76,13 +76,6 @@ class _ThemeHomeState extends State<ThemeHome> {
                 },
                 secondary: const Icon(Icons.brightness_3),
               ),
-              ListTile(
-                title: Text(_themeIsBlack ? 'black' : "white"),
-                onTap: () {
-                  // Update the state of the app.
-                  // ...
-                },
-              ),
             ],
           ),
         ),
